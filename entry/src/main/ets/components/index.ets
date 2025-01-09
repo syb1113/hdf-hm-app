@@ -1,0 +1,1 @@
+export { LinkToCart } from './link_to_cart'
