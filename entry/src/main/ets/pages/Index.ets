@@ -118,7 +118,7 @@ struct Index {
         }
 
         TabContent() {
-          HealthView()
+          HealthView({pathStack: this.pathStack})
         }
 
         TabContent() {

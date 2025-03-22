@@ -1,7 +1,8 @@
 import { AppMainColor } from "../constant/colors"
-
+import { AppRouterMap } from "../constant/router"
 @Component
 export struct HealthView {
+  pathStack: NavPathStack | undefined
   build() {
     Column({
       space: 8
@@ -114,7 +115,12 @@ export struct HealthView {
               .padding(8)
               .layoutWeight(1)
             }
-          }
+          }.onClick(()=>{
+            this.pathStack!.pushPath({
+              name: AppRouterMap.GOODS_DETAIL,
+              // param: ''
+            })
+          })
 
         }
       }

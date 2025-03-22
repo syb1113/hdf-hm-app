@@ -53,11 +53,6 @@ export struct GoodsListView {
                   .height(60)
                   .width(140)
                   .objectFit(ImageFit.Contain)
-                  .onClick(() => {
-                    this.pathStack?.pushPath({
-                      name: AppRouterMap.GOODS_DETAIL
-                    })
-                  })
                 Column({
                   space: 2
                 }) {
@@ -99,6 +94,11 @@ export struct GoodsListView {
               color: '#ffeeebeb',
               radius: 1
             })
+            .onClick(() => {
+              this.pathStack?.pushPath({
+                name: AppRouterMap.GOODS_DETAIL
+              })
+            })
           }, (item: number) => item + "")
         }
         .layoutWeight(1)
@@ -111,7 +111,6 @@ export struct GoodsListView {
     .onReady((context) => {
       this.pathStack = context.pathStack
     })
-    .title("商品列表")
-
+    .title("药品列表")
   }
 }
