@@ -20,14 +20,12 @@ class HttpClient {
     return HttpClient.session
   }
 }
-// 公司
-export const baseUrl: string = "http://192.168.3.119:3006"
+export const baseUrl: string = "http://192.168.187.182:3006"
 
 export function rcpGET(url: string) {
   url = baseUrl + url
   return HttpClient.getSession().get(url)
 }
-
 export function rcpPost(url: string, data?: object) {
   url = baseUrl + url
   return HttpClient.getSession().post(url, data)

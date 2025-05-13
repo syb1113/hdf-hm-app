@@ -15,6 +15,9 @@ export struct KnowledgeView {
                 Column() {
                   Text("耳后长出的小肉球，到底是啥啊？")
                     .width('100%')
+                  Text("健康作息")
+                    .fontSize(12)
+                    .alignSelf(ItemAlign.Start)
                   Row() {
                     Text("2024-11-13")
                       .fontSize(12)

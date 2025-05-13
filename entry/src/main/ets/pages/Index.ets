@@ -66,7 +66,7 @@ struct Index {
       }) {
         Image(this.selIndex == 3 ? $rawfile("images/nav_user_sel.png") : $rawfile("images/nav_user.png"))
           .width(30)
-        Text("我")
+        Text("我的")
           .fontSize(12)
       }.onClick(() => {
         this.selIndex = 3
