@@ -2,7 +2,9 @@
 export struct PageNotFoundView {
   build() {
     NavDestination() {
-      Text("404 页面找不到")
+      Image($rawfile("images/404.png"))
+        .width("100%")
+      Text("页面找不到") 
     }
 
   }

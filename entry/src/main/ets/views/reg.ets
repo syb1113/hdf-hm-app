@@ -1,62 +1,205 @@
 import { AppMainColor } from "../constant/colors"
 import { AppRouterMap } from "../constant/router"
-import { UserDataInfo } from "../modules/UserData"
-import { uploadFileToServer } from '../utils/fileUpload'
-import { common } from '@kit.AbilityKit'
-import inputMethod from '@ohos.inputMethod'
-import dayjs from "dayjs"
-import { router } from '@kit.ArkUI'
-import { showToast } from "../utils/showToast"
+import { uploadFileToServer } from '../utils/upImg'
+import { UserModule } from "../module"
+import { common } from "@kit.AbilityKit"
 import { rcpPost, baseUrl } from "../utils/http"
+import { router } from "@kit.ArkUI"
+import { showToast } from '../utils/showToast'
+import { AppPreferences } from "../utils/AppStore"
 
-let im = inputMethod.getController()
 
 @Component
-export struct RegView{
-  @State imgSrc: string = ""
+export struct RegView {
+  @State userFrom: UserModule = {
+    userName: "",
+    password: "",
+    avatar: "",
+    mobile: ""
+  }
+  @State repassword: string = ""
+  @State checkBoxSelect: boolean = false
   @State uploadShow: boolean = true
-  // 控制日期选择的显示隐藏
-  @State isLunar: boolean = false
-  // 控制性别选择的显示隐藏
-  @State isSex: boolean = false
-  private select: number = 1
-  private apfruits: string[] = ['男', '女']
+  pathStack: NavPathStack | undefined
   // 防止多次点击
   @State notClick: boolean = true
-  private selectedDate: Date = new Date('2000-11-09')
-  pageStack: NavPathStack = new NavPathStack()
-  @State RegUserData: UserDataInfo = {
-    userName: "", //用户名
-    password: "", //密码
-    birthday: "", //生日
-    age: "", //年龄
-    avatar: "", //头像
-    area: "", //楼栋信息
-    address: "", //详细地址门派信息
-    nickName: "", //昵称
-    gender: ""//性别
-  }
-  @Require pathStack: NavPathStack | undefined
 
-  selectDialog() {
-    this.isLunar = false;
-    this.isSex = false;
+  ShowToast(title: string) {
+    let ShowToast = new showToast(title)
+    ShowToast.ShowToast()
   }
 
-  RegToServer() {
-
+  requestReg() {
+    if (!this.checkBoxSelect) {
+      this.ShowToast("请勾选用户协议")
+      return
+    }
+    if (!this.userFrom.userName || !this.userFrom.password) {
+      this.ShowToast("请输入用户名或密码")
+      return
+    }
+    if (!(this.repassword === this.userFrom.password)) {
+      this.ShowToast("密码不一致，请重新输入")
+      return
+    }
+    rcpPost("/auth/reg", this.userFrom)
+      .then(res => res.toJSON())
+      .then(res => {
+        if (res != null) {
+          if (res!["success"]) {
+            let ShowToast = new showToast(res["errorMessage"] + ",正在登录")
+            this.notClick = false
+            ShowToast.ShowToast()
+            AppPreferences.setData("token", res!["data"])
+            setTimeout(() => {
+              router.replaceUrl({
+                url: "pages/Index"
+              })
+            }, 2000)
+          } else {
+            this.ShowToast("用户名重复")
+          }
+        }
+      })
   }
+
   build() {
     NavDestination() {
       Column({
         space: 16
       }) {
+        Image($rawfile("images/jiankang.png"))
+          .width(120)
+        Text("注册账号")
+          .width('100%')
+          .textAlign(TextAlign.Start)
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+
+        Column() {
+          Image(this.userFrom.avatar)
+            .width(80)
+        }
+        .borderRadius("50%")
+        .clip(true)
+        .width(80)
+        .height(80)
+        .backgroundImage($rawfile("jia.png"), ImageRepeat.Y)
+        .backgroundImageSize({ width: 80, height: 80 })
+        .border({
+          width: "1px",
+          color: "#ddd"
+        })
+        .onClick(() => {
+          const context = getContext() as common.Context // 当前上下文
+          uploadFileToServer(baseUrl + '/common/upload', context, (res) => {
+            if (res!["success"]) {
+              console.log(JSON.stringify(res))
+              this.userFrom.avatar = baseUrl + res!["data"]
+              console.log(this.userFrom.avatar)
+            } else {
+              console.log("上传文件失败")
+            }
+          })
+        })
+        .visibility(this.uploadShow ? Visibility.Visible : Visibility.Hidden)
+
+        Text("点击上传用户头像").fontSize(14)
+        TextInput({
+          placeholder: '请输入用户名',
+          text: $$this.userFrom.userName
+        })
+          .border({
+            width: {
+              bottom: '1px'
+            },
+            color: "#999"
+          })
+          .padding(8)
+          .backgroundColor("#fff")
+          .borderRadius(0)
+
+        TextInput({
+          placeholder: '请输入密码',
+          text: $$this.userFrom.password
+        })
+          .type(InputType.Password)
+          .border({
+            width: {
+              bottom: '1px'
+            },
+            color: "#999"
+          })
+          .borderRadius(0)
+          .padding(8)
+          .backgroundColor("#fff")
+
+        TextInput({
+          placeholder: '请再次输入密码',
+          text: $$this.repassword
+        })
+          .type(InputType.Password)
+          .border({
+            width: {
+              bottom: '1px'
+            },
+            color: "#999"
+          })
+          .borderRadius(0)
+          .padding(8)
+          .backgroundColor("#fff")
+
+        TextInput({
+          placeholder: '请输入手机号',
+          text: $$this.userFrom.mobile
+        })
+          .border({
+            width: {
+              bottom: '1px'
+            },
+            color: "#999"
+          })
+          .padding(8)
+          .backgroundColor("#fff")
+          .borderRadius(0)
+          .onBlur(() => {
+            let reg = /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/
+            let flag = reg.test(this.userFrom.mobile as string)
+            if (!flag) {
+              this.ShowToast("请输入正确的手机号")
+              return
+            }
+          })
+        Button("注册")
+          .width('45%')
+          .backgroundColor(AppMainColor.PRIMARY_COLOR)
+          .type(ButtonType.Normal)
+          .onClick(() => {
+            if (this.notClick) {
+              this.requestReg()
+            }
+
+          })
         Row() {
-          Image($rawfile("images/ic_public_arrow_left_filled.svg")).width(35)
-            .onClick(() => {
-              router.replaceUrl({
-                url: "pages/LoginPage"
-              })
+          Checkbox()
+            .select(this.checkBoxSelect)
+            .shape(CheckBoxShape.ROUNDED_SQUARE)
+            .selectedColor(AppMainColor.PRIMARY_COLOR)
+            .onChange((v) => {
+              this.checkBoxSelect = v
+            })
+          Text("请勾选用户协议")
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Start)
+        .padding(8)
+
+        Text("已有账号，我要注册")
+          .fontSize(AppMainColor.SM)
+          .fontColor(AppMainColor.GRAY_COLOR)
+          .onClick(() => {
+            this.pathStack?.replacePath({
+              name: AppRouterMap.LOGIN
             })
           Text("用户注册")
         }
@@ -196,7 +339,7 @@ export struct RegView{
       .height('100%')
       .width('100%')
     }
-    .onReady(context=>{
+    .onReady(context => {
       this.pathStack = context.pathStack
     })
   }

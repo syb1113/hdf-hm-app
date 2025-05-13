@@ -1,15 +1,24 @@
+import { rcpGET,baseUrl } from '../utils/http'
+import { HospitalInfo } from '../module/hospitalModule'
+import { getHospitalInfo } from '../api/hospitalApi'
+import { promptAction, router } from '@kit.ArkUI'
+@Extend(Text)
+function style() {
+  .width('100%')
+  .margin({bottom:5})
+}
 @Component
 export struct HospitalsView {
-  // @Builder
-  // navTitle() {
-  //   Row() {
-  //     Text("医院列表")
-  //   }
-  //   .width('100%')
-  //   .height('100%')
-  //   .justifyContent(FlexAlign.Center)
-  // }
-
+  @State currenIndex: number = 0
+  @State hospitalInfoData: HospitalInfo[] = []
+  // 传给子组件的数据
+  aboutToAppear(): void {
+    getHospitalInfo()
+      .then(res => res.toJSON())
+      .then(async res => {
+        this.hospitalInfoData = res!["data"]
+      })
+  }
   build() {
     NavDestination() {
       Column() {
@@ -19,36 +28,42 @@ export struct HospitalsView {
         })
           .borderRadius(4)
         List() {
-          ListItem() {
-            Column({
-              space: 8
-            }) {
-              Row() {
-                Image($rawfile("images/yisheng.png"))
-                  .width(100)
-                Column({
-                  space: 4
-                }) {
-                  Text("北京协和医院")
-                  Text("北京市xx路xx号")
-                  Row(){
-                    Text("公有")
-                    Text("三甲")
-                  }
-                }.layoutWeight(1)
-                .alignItems(HorizontalAlign.Start)
-                .padding(4)
+          ForEach(this.hospitalInfoData, (item: HospitalInfo) => {
+            ListItem() {
+              Column({
+                space: 8
+              }) {
+                Row() {
+                  Image(baseUrl+item.image)
+                    .width(100)
+                  Column({
+                    space: 4
+                  }) {
+                    Text(item.name)
+                      .style()
+                    Text(item.address)
+                      .style()
+                    Text(item.phone)
+                      .style()
+                    Row(){
+                      Text(item.desc)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .maxLines(1)
+                        .style()
+                    }
+                  }.layoutWeight(1)
+                  .alignItems(HorizontalAlign.Start)
+                  .padding(4)
+                }
+                Divider()
+                  .width('100%')
+                  .color('#999')
+                  .height('1px')
               }
-              Divider()
-                .width('100%')
-                .color('#999')
-                .height('1px')
+              .padding(8)
+              .backgroundColor("#fff")
             }
-            .padding(8)
-            .backgroundColor("#fff")
-
-
-          }
+          }, (item: HospitalInfo) => item.id)
         }
       }
       .padding(4)

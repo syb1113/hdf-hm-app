@@ -90,6 +90,12 @@ export struct HomeView {
                 right: 20
               })
           }
+          .onClick(()=>{
+            this.pathStack!.pushPath({
+              name: AppRouterMap.DOCTORS,
+              // param: ''
+            })
+          })
           .width('45%')
           .height(150)
           .backgroundColor("#fff")
@@ -154,21 +160,6 @@ export struct HomeView {
             Column({
               space: 12
             }) {
-              Image($rawfile("images/jiankang.png"))
-                .width("50%")
-              Text("查健康")
-            }.onClick(()=>{
-              this.pathStack!.pushPath({
-                name: AppRouterMap.ARTICLE_LIST,
-                // param: ''
-              })
-            })
-          }
-
-          ListItem() {
-            Column({
-              space: 12
-            }) {
               Image($rawfile("images/jibing.png"))
                 .width("50%")
               Text("查疾病")
@@ -182,7 +173,7 @@ export struct HomeView {
 
         }
         .alignListItem(ListItemAlign.Center)
-        .lanes(5)
+        .lanes(4)
         .width('100%')
         .backgroundColor("#fff")
         .padding(8)
@@ -203,7 +194,7 @@ export struct HomeView {
           .width('100%')
 
           // 医生信息
-          List({}) {
+          List() {
             ListItem() {
               Row() {
                 Image($rawfile("images/yisheng.png"))
